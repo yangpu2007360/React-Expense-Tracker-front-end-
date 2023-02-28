@@ -22,18 +22,24 @@ function App() {
       text: data.text,
       amount: +data.amount
     }
-    try { axios.post("http://localhost:3000/", newRecord).then(response => setTransactions(response.data)) }
+    const newTransactions = transactions.concat(newRecord)
+    try {
+      axios.post("http://localhost:3000/", newRecord).then(
+        setTransactions(newTransactions)
+      )
+    }
     catch (error) {
       console.log(error)
     }
   }
   const deleteFromHistory = (id) => {
-    try { axios.delete(`http://localhost:3000/${id}`).then(response => setTransactions(response.data)) }
+    const updatedTransactions = transactions.filter(record => record.id !== id)
+    try { axios.delete(`http://localhost:3000/${id}`).then(setTransactions(updatedTransactions)) }
     catch (error) {
       console.log(error)
     }
   }
-  const amounts = transactions.map(a => a.amount);
+  const amounts = transactions.map(a => parseFloat(a.amount));
   const incomeList = amounts.filter(function (a) { return a >= 0 })
   const income = incomeList.reduce((partialSum, a) => partialSum + a, 0)
   const expenseList = amounts.filter(function (a) { return a < 0 })
