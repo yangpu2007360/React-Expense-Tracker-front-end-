@@ -4,13 +4,43 @@ import axios from 'axios';
 import Balance from './components/Balance';
 import History from './components/History';
 import AddTransaction from './components/AddTransaction';
+import { useReducer } from 'react';
+
+function tasksReducer(state, action) {
+  switch (action.type) {
+    case 'added': {
+      return [...state, {
+        id: action.id,
+        text: action.text,
+        amount: action.amount
+      }];
+    }
+    case 'fetch': {
+      return action.payload;
+    }
+    case 'delete': {
+      return state.filter(t => t.id !== action.id);
+    }
+    default: {
+      throw Error('Unknown action: ' + action.type);
+    }
+  }
+}
+
 function App() {
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, dispatch] = useReducer(
+    tasksReducer,
+    []
+  );
+  // const [transactions, setTransactions] = useState([]);
   useEffect(() => {
     try {
       axios
         .get("http://localhost:3000/")
-        .then(response => setTransactions(response.data))
+        .then(response => dispatch({
+          type: 'fetch',
+          payload: response.data
+        }))
     }
     catch (error) {
       console.log(error)
@@ -25,7 +55,13 @@ function App() {
     const newTransactions = transactions.concat(newRecord)
     try {
       axios.post("http://localhost:3000/", newRecord).then(
-        setTransactions(newTransactions)
+        // setTransactions(newTransactions)
+        dispatch({
+          type: 'added',
+          id: newRecord.id,
+          text: newRecord.text,
+          amount: newRecord.amount,
+        })
       )
     }
     catch (error) {
@@ -33,8 +69,13 @@ function App() {
     }
   }
   const deleteFromHistory = (id) => {
-    const updatedTransactions = transactions.filter(record => record.id !== id)
-    try { axios.delete(`http://localhost:3000/${id}`).then(setTransactions(updatedTransactions)) }
+    // const updatedTransactions = transactions.filter(record => record.id !== id)
+    try {
+      axios.delete(`http://localhost:3000/${id}`).then(dispatch({
+        type: 'delete',
+        id: id
+      }))
+    }
     catch (error) {
       console.log(error)
     }
