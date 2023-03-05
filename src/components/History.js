@@ -1,6 +1,22 @@
 import Transaction from './Transaction'
 import React from 'react'
-function History({ transactions, deleteFromHistory }) {
+import { useTransactions, useTransactionsDispatch } from '../TransactionsContext.js';
+import axios from 'axios';
+
+function History() {
+    const transactions = useTransactions()
+    const dispatch = useTransactionsDispatch();
+    const deleteFromHistory = (id) => {
+        try {
+            axios.delete(`http://localhost:3000/${id}`).then(dispatch({
+                type: 'delete',
+                id: id
+            }))
+        }
+        catch (error) {
+            console.log(error)
+        }
+    }
     return (
         <>
             <div className='history-title'>History</div>
@@ -8,5 +24,4 @@ function History({ transactions, deleteFromHistory }) {
         </>
     )
 }
-
 export default History

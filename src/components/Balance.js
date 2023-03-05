@@ -1,5 +1,13 @@
 import React from 'react';
-function Balance({ income, expense }) {
+import { useTransactions } from '../TransactionsContext.js';
+
+function Balance() {
+    const transactions = useTransactions()
+    const amounts = transactions.map(a => parseFloat(a.amount));
+    const incomeList = amounts.filter(function (a) { return a >= 0 })
+    const income = incomeList.reduce((partialSum, a) => partialSum + a, 0)
+    const expenseList = amounts.filter(function (a) { return a < 0 })
+    const expense = Math.abs(expenseList.reduce((partialSum, a) => partialSum + a, 0))
     return (
         <div className='balance-section'>
             <div>YOUR BALANCE</div>

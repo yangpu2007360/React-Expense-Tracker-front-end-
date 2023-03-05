@@ -1,15 +1,26 @@
-import { createContext, useContext, useReducer } from 'react';
+import { createContext, useContext, useReducer, useEffect } from 'react';
+import axios from 'axios';
 
 const TransactionsContext = createContext(null);
-
 const TransactionsDispatchContext = createContext(null);
-
 export function TransactionsProvider({ children }) {
     const [transactions, dispatch] = useReducer(
         transactionsReducer,
         []
     );
-
+    useEffect(() => {
+        try {
+            axios
+                .get("http://localhost:3000/")
+                .then(response => dispatch({
+                    type: 'fetch',
+                    payload: response.data
+                }))
+        }
+        catch (error) {
+            console.log(error)
+        }
+    }, []);
     return (
         <TransactionsContext.Provider value={transactions}>
             <TransactionsDispatchContext.Provider value={dispatch}>
@@ -18,15 +29,6 @@ export function TransactionsProvider({ children }) {
         </TransactionsContext.Provider>
     );
 }
-
-export function useTransactions() {
-    return useContext(TransactionsContext);
-}
-
-export function useTransactionsDispatch() {
-    return useContext(TransactionsDispatchContext);
-}
-
 function transactionsReducer(state, action) {
     switch (action.type) {
         case 'added': {
@@ -46,5 +48,13 @@ function transactionsReducer(state, action) {
             throw Error('Unknown action: ' + action.type);
         }
     }
+}
+
+export function useTransactions() {
+    return useContext(TransactionsContext);
+}
+
+export function useTransactionsDispatch() {
+    return useContext(TransactionsDispatchContext);
 }
 
