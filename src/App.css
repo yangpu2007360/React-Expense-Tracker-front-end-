@@ -60,3 +60,9 @@
   width: 50%;
   margin: auto;
 }
+.loading{
+  position: absolute;
+  top:40%;
+  left:50%;
+  transform: translate(-50px);
+}

@@ -1,21 +1,26 @@
-import { createContext, useContext, useReducer, useEffect } from 'react';
+import { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import axios from 'axios';
 
 const TransactionsContext = createContext(null);
 const TransactionsDispatchContext = createContext(null);
+const LoadingContext = createContext(null);
 export function TransactionsProvider({ children }) {
+
+    const [loading, setLoading] = useState(true);
     const [transactions, dispatch] = useReducer(
         transactionsReducer,
         []
     );
     useEffect(() => {
+
+
         try {
             axios
                 .get("http://localhost:3000/")
                 .then(response => dispatch({
                     type: 'fetch',
                     payload: response.data
-                }))
+                })).then(setLoading(false))
         }
         catch (error) {
             console.log(error)
@@ -24,7 +29,9 @@ export function TransactionsProvider({ children }) {
     return (
         <TransactionsContext.Provider value={transactions}>
             <TransactionsDispatchContext.Provider value={dispatch}>
-                {children}
+                <LoadingContext.Provider value={loading}>
+                    {children}
+                </LoadingContext.Provider>
             </TransactionsDispatchContext.Provider>
         </TransactionsContext.Provider>
     );
@@ -56,5 +63,9 @@ export function useTransactions() {
 
 export function useTransactionsDispatch() {
     return useContext(TransactionsDispatchContext);
+}
+
+export function useLoading() {
+    return useContext(LoadingContext);
 }
 
